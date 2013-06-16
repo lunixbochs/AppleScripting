@@ -1,3 +1,4 @@
+import os
 import platform
 import sublime
 import sublime_plugin
@@ -21,6 +22,9 @@ if __name__ == '__main__':
 '''
 
 
+temp_prefix = tempfile.mkdtemp()
+
+
 class ScriptLoader(sublime_plugin.EventListener):
     LOADING = ('\n' * 3) + (' ' * 10) + 'Loading...' + ('\n' * 3)
 
@@ -38,7 +42,7 @@ class ScriptLoader(sublime_plugin.EventListener):
             if not code.strip():
                 return
 
-            proxy = file_name + '.as'
+            proxy = os.path.join(temp_prefix, os.path.basename(file_name))
             with open(proxy, 'w', encoding='utf-8') as f:
                 f.write(code)
 
