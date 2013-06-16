@@ -18,7 +18,7 @@ def decompile(path):
 
 if __name__ == '__main__':
     path = sys.argv[1]
-    print decompile(path).replace('\r', '\n').encode('utf8')
+    sys.stdout.write(decompile(path).replace('\r', '\n').encode('utf8'))
 '''
 
 
