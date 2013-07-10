@@ -80,7 +80,7 @@ class ScriptLoader(sublime_plugin.EventListener):
 
     def on_load_async(self, view):
         file_name = view.file_name()
-        if file_name.endswith('.scpt'):
+        if file_name and file_name.endswith('.scpt'):
             settings = view.settings()
             settings.set('scpt-scratch', True)
             view.set_scratch(True)
