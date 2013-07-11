@@ -54,13 +54,16 @@ def find_app(name):
     return app_name_cache[name]
 
 
-def execute_applescript(source):
+def execute_applescript(source, output):
+    with Edit(output) as edit:
+        edit.insert(0, 'Running AppleScript...\n' + ('-' * 22) + '\n')
+
     f = tempfile.NamedTemporaryFile(suffix='.applescript', delete=True)
     f.write(source.encode('utf8'))
     f.flush()
     out = popen('/usr/bin/osascript', f.name)
-    if out:
-        print('AppleScript result:', out)
+    with Edit(output) as edit:
+        edit.insert(output.size(), out)
     f.close()
 
 
@@ -116,23 +119,26 @@ class ScriptLoader(sublime_plugin.EventListener):
             return
 
 
-class AppleScriptCommand:
-    def is_enabled(self):
-        if platform.system() != 'Darwin':
-            return False
+def should_enable(self):
+    if platform.system() != 'Darwin':
+        return False
 
-        syntax = self.window.active_view().settings().get('syntax')
-        return 'AppleScript' in syntax
+    syntax = self.window.active_view().settings().get('syntax')
+    return 'AppleScript' in syntax
 
 
-class run_applescript(sublime_plugin.WindowCommand, AppleScriptCommand):
+class run_applescript(sublime_plugin.WindowCommand):
     def run(self):
         view = self.window.active_view()
         code = view.substr(sublime.Region(0, view.size()))
-        Thread(target=execute_applescript, args=(code,)).start()
+        output = self.window.create_output_panel('applescript')
+        self.window.run_command('show_panel', {'panel': 'output.applescript'})
+        Thread(target=execute_applescript, args=(code, output)).start()
 
+    def is_enabled(self):
+        return should_enable(self)
 
-class open_scripting_dictionary(sublime_plugin.WindowCommand, AppleScriptCommand):
+class open_scripting_dictionary(sublime_plugin.WindowCommand):
     def run(self):
         view = self.window.active_view()
         name = get_tell_target(view).strip('"') + '.app'
@@ -143,3 +149,6 @@ class open_scripting_dictionary(sublime_plugin.WindowCommand, AppleScriptCommand
         app = find_app(name)
         if app:
             launch_scripting_dictionary(app)
+
+    def is_enabled(self):
+        return should_enable(self)
