@@ -127,7 +127,7 @@ def should_enable(self):
     if view:
         syntax = view.settings().get('syntax')
         return 'AppleScript' in syntax
-
+    return False
 
 class run_applescript(sublime_plugin.WindowCommand):
     def run(self):
