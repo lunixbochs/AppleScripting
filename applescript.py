@@ -123,8 +123,10 @@ def should_enable(self):
     if platform.system() != 'Darwin':
         return False
 
-    syntax = self.window.active_view().settings().get('syntax')
-    return 'AppleScript' in syntax
+    view = self.window.active_view()
+    if view:
+        syntax = view.settings().get('syntax')
+        return 'AppleScript' in syntax
 
 
 class run_applescript(sublime_plugin.WindowCommand):
